@@ -79,14 +79,12 @@ def callback_query(call):
         if os.path.exists(file_name):
             bot.answer_callback_query(call.id, "Dosya gönderiliyor...")
             with open(file_name, 'rb') as doc:
-                # Dosyayı gönder ve uyarı mesajını ekle
                 sent_msg = bot.send_document(
                     call.message.chat.id, 
                     doc, 
                     caption=f"✅ **{file_name}** Hazır!\n\n⚠️ **UYARI: Bu dosya 60 saniye sonra otomatik olarak silinecektir!**",
                     parse_mode="Markdown"
                 )
-                # Silme işlemini başka bir kolda (thread) başlat
                 threading.Thread(target=auto_delete, args=(call.message.chat.id, sent_msg.message_id)).start()
         else:
             bot.answer_callback_query(call.id, "⚠️ Bu dosya şu anda mevcut değil!", show_alert=True)
