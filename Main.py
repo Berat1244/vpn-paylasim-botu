@@ -3,7 +3,7 @@ from telebot import types
 import os, threading, time
 from flask import Flask
 
-# --- WEB SUNUCUSU (Render İçin) ---
+# --- RENDER İÇİN WEB SUNUCUSU ---
 app = Flask('')
 @app.route('/')
 def home(): return "VPN Botu Aktif!"
@@ -14,7 +14,7 @@ def run_flask():
 TOKEN = '8552109076:AAGB_PWP9Tko3UIyDol-8ZQ4xmaP9Omk3m8'
 bot = telebot.TeleBot(TOKEN)
 
-# --- MENÜLER ---
+# --- KLAVYELER (MENÜLER) ---
 def main_menu():
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton("📄 Dosya Al", callback_data="cihaz_sec"))
@@ -43,7 +43,7 @@ def ios_files():
 
 # --- OTOMATİK SİLME FONKSİYONU ---
 def auto_delete(chat_id, message_id):
-    time.sleep(60) # 60 saniye bekler
+    time.sleep(60) # 60 Saniye Bekle
     try:
         bot.delete_message(chat_id, message_id)
     except:
@@ -68,15 +68,16 @@ def callback_query(call):
         bot.edit_message_text("🍎 iOS için dosya seçin:", call.message.chat.id, call.message.message_id, reply_markup=ios_files())
 
     elif call.data.startswith("file_"):
-        # GITHUB'DAKİ DOSYA İSİMLERİYLE BİREBİR AYNI YAPILDI
+        # DOSYA İSİMLERİ SADELEŞTİRİLDİ (Hata almamak için)
         files = {
-            "file_and_wp": "Whatsapppass🇹🇷.hc",
-            "file_and_yt": "Youtubepass🇹🇷.hc",
-            "file_ios_wp": "Whatsapppass🇹🇷.npvt",
-            "file_ios_yt": "Youtubepass🇹🇷.npvt"
+            "file_and_wp": "whatsapp.hc",
+            "file_and_yt": "youtube.hc",
+            "file_ios_wp": "whatsapp.npvt",
+            "file_ios_yt": "youtube.npvt"
         }
         file_name = files.get(call.data)
         
+        # Dosya kontrolü ve gönderimi
         if os.path.exists(file_name):
             bot.answer_callback_query(call.id, "Dosya gönderiliyor...")
             with open(file_name, 'rb') as doc:
@@ -86,11 +87,11 @@ def callback_query(call):
                     caption=f"✅ **{file_name}** Hazır!\n\n⚠️ **UYARI: Bu dosya 60 saniye sonra otomatik olarak silinecektir!**",
                     parse_mode="Markdown"
                 )
+                # Silme zamanlayıcısını başlat
                 threading.Thread(target=auto_delete, args=(call.message.chat.id, sent_msg.message_id)).start()
         else:
-            # Dosya bulunamazsa burası çalışır
-            bot.answer_callback_query(call.id, f"⚠️ Hata: {file_name} bulunamadı!", show_alert=True)
-            bot.send_message(call.message.chat.id, f"❌ Hata: `{file_name}` dosyası GitHub'da bulunamadı.")
+            # Hata durumunda uyarı ver
+            bot.answer_callback_query(call.id, f"❌ Hata: {file_name} dosyası bulunamadı!", show_alert=True)
 
 if __name__ == "__main__":
     threading.Thread(target=run_flask).start()
