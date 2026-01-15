@@ -3,7 +3,7 @@ from telebot import types
 import os, threading, time
 from flask import Flask
 
-# --- WEB SUNUCUSU ---
+# --- WEB SUNUCUSU (Render İçin) ---
 app = Flask('')
 @app.route('/')
 def home(): return "VPN Botu Aktif!"
@@ -43,7 +43,7 @@ def ios_files():
 
 # --- OTOMATİK SİLME FONKSİYONU ---
 def auto_delete(chat_id, message_id):
-    time.sleep(60) # 60 saniye bekle
+    time.sleep(60) # 60 saniye bekler
     try:
         bot.delete_message(chat_id, message_id)
     except:
@@ -68,11 +68,12 @@ def callback_query(call):
         bot.edit_message_text("🍎 iOS için dosya seçin:", call.message.chat.id, call.message.message_id, reply_markup=ios_files())
 
     elif call.data.startswith("file_"):
+        # GITHUB'DAKİ DOSYA İSİMLERİYLE BİREBİR AYNI YAPILDI
         files = {
-            "file_and_wp": "Whatsapp.pass.hc",
-            "file_and_yt": "Youtube.pass.hc",
-            "file_ios_wp": "Whatsapp.pass.npvt",
-            "file_ios_yt": "Youtube.pass.npvt"
+            "file_and_wp": "Whatsapppass🇹🇷.hc",
+            "file_and_yt": "Youtubepass🇹🇷.hc",
+            "file_ios_wp": "Whatsapppass🇹🇷.npvt",
+            "file_ios_yt": "Youtubepass🇹🇷.npvt"
         }
         file_name = files.get(call.data)
         
@@ -87,7 +88,9 @@ def callback_query(call):
                 )
                 threading.Thread(target=auto_delete, args=(call.message.chat.id, sent_msg.message_id)).start()
         else:
-            bot.answer_callback_query(call.id, "⚠️ Bu dosya şu anda mevcut değil!", show_alert=True)
+            # Dosya bulunamazsa burası çalışır
+            bot.answer_callback_query(call.id, f"⚠️ Hata: {file_name} bulunamadı!", show_alert=True)
+            bot.send_message(call.message.chat.id, f"❌ Hata: `{file_name}` dosyası GitHub'da bulunamadı.")
 
 if __name__ == "__main__":
     threading.Thread(target=run_flask).start()
